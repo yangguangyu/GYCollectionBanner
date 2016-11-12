@@ -12,11 +12,10 @@
 static  NSString * const kCellID = @"collectionViewCell";
 
 @interface GYCollectionBanner () <UICollectionViewDelegate,UICollectionViewDataSource> {
-    UIPageControl * _pageControl;
+//    UIPageControl * _pageControl;
     UICollectionView *_collectionView;
     UICollectionViewFlowLayout *_flowLayout;
     NSArray *_images;
-    //    CADisplayLink *_timer;
     NSTimer *_timer;
 }
 
