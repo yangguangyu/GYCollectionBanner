@@ -7,6 +7,7 @@
 //
 
 #import "GYCollectionBanner.h"
+#import "UIImageView+WebCache.h"
 
 static  NSString * const kCellID = @"collectionViewCell";
 
@@ -14,8 +15,8 @@ static  NSString * const kCellID = @"collectionViewCell";
     UIPageControl * _pageControl;
     UICollectionView *_collectionView;
     UICollectionViewFlowLayout *_flowLayout;
-    NSArray *_localImage;
-//    CADisplayLink *_timer;
+    NSArray *_images;
+    //    CADisplayLink *_timer;
     NSTimer *_timer;
 }
 
@@ -36,25 +37,26 @@ static  NSString * const kCellID = @"collectionViewCell";
     return self;
 }
 
--(instancetype)initWithFrame:(CGRect)frame localImageArray:(NSArray *)localImages {
+-(instancetype)initWithFrame:(CGRect)frame imageArray:(NSArray *)images {
     self = [super initWithFrame:frame];
     if (self) {
         [self configUI];
         
         if (self.loopScroll) {//循环滚动的话，首位添加2个
-            NSMutableArray *tempArray = [localImages mutableCopy];
-            [tempArray insertObject:localImages.lastObject atIndex:0];
-            [tempArray addObject:localImages.firstObject];
-            _localImage = tempArray;
+            NSMutableArray *tempArray = [images mutableCopy];
+            [tempArray insertObject:images.lastObject atIndex:0];
+            [tempArray addObject:images.firstObject];
+            _images = tempArray;
         }else {
-            _localImage = localImages;
+            _images = images;
         }
-        _pageControl.numberOfPages = localImages.count;
-        CGSize size = [_pageControl sizeForNumberOfPages:localImages.count];
+        _pageControl.numberOfPages = images.count;
+        CGSize size = [_pageControl sizeForNumberOfPages:images.count];
         _pageControl.frame = CGRectMake((self.frame.size.width - size.width)*0.5, 0.9 * self.frame.size.height, size.width, size.height);
     }
     return self;
 }
+
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -127,7 +129,7 @@ static  NSString * const kCellID = @"collectionViewCell";
         return;
     }
     
-    if (_localImage.count == 1) {//一张图，不需要轮播
+    if (_images.count == 1 ) {//一张图，不需要轮播
         return;
     }
     
@@ -149,23 +151,40 @@ static  NSString * const kCellID = @"collectionViewCell";
     }
 }
 
+- (void)checkLastImage {
+    NSInteger index = (NSInteger)_collectionView.contentOffset.x / self.frame.size.width;
+    if (index == _images.count - 1) {//数组前面多一个
+        if (!_loopScroll) {//不循环
+            [self stopTimer];
+        }else {//循环
+            [self resetCollectionView];
+        }
+    }
+}
+
+- (void)checkFirstImage {
+    NSInteger index = (NSInteger)_collectionView.contentOffset.x / self.frame.size.width;
+    if (index == 0) {
+        [self jumpToLast];
+    }
+}
 
 #pragma mark - UITableViewDataSources
 -(NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
-    if (_loopScroll) {
-        return _pageControl.numberOfPages + 2;
-    }
-    return _pageControl.numberOfPages;
+    return _loopScroll ? _pageControl.numberOfPages + 2 : _pageControl.numberOfPages;
 }
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
     UICollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:kCellID forIndexPath:indexPath];
-    //本地图片
+    
     UIImageView *imageView = [[UIImageView alloc] init];
     imageView.frame = CGRectMake(0, 0, _flowLayout.itemSize.width,
                                        _flowLayout.itemSize.height);
-    
-    imageView.image = _localImage[indexPath.row];
+    if ([_images[indexPath.row] isKindOfClass:[UIImage class]]) {//传图片认为是本地资源
+        imageView.image = _images[indexPath.row];
+    }else {
+        [imageView sd_setImageWithURL:[NSURL URLWithString:_images[indexPath.row]] placeholderImage:self.placeHolder];
+    }
     imageView.contentMode = self.contentMode;
     imageView.clipsToBounds = YES;
     [cell setBackgroundView:imageView];
@@ -206,29 +225,12 @@ static  NSString * const kCellID = @"collectionViewCell";
 }
 
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
-    NSInteger index = (NSInteger)scrollView.contentOffset.x / self.frame.size.width;
-    if (index == _localImage.count - 1) {//拖到最后一个
-        if (!_loopScroll) {//不循环
-            [self stopTimer];
-        }else {//循环
-            [self resetCollectionView];
-        }
-    }
-    
-    if (index == 0) {
-        [self jumpToLast];
-    }
+    [self checkLastImage];
+    [self checkFirstImage];
 }
 
 - (void)scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollView {
-    NSInteger index = (NSInteger)scrollView.contentOffset.x / self.frame.size.width;
-    if (index == _localImage.count - 1) {//数组前面多一个
-        if (!_loopScroll) {//不循环
-            [self stopTimer];
-        }else {//循环
-            [self resetCollectionView];
-        }
-    }
+    [self checkLastImage];
 }
 
 

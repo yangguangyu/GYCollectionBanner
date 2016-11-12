@@ -19,8 +19,8 @@ typedef void(^collectionViewItemDidSelectedBlock)(GYCollectionBanner *banner,NSI
 
 @interface GYCollectionBanner : UIView
 
-/* 本地图片 */
-//@property (nonatomic, strong) NSArray *localImage;
+/* 占位图片 */
+@property (nonatomic, strong) UIImage *placeHolder;
 
 /* 自动滚动 */
 @property (nonatomic, assign) BOOL autoScroll;
@@ -36,5 +36,5 @@ typedef void(^collectionViewItemDidSelectedBlock)(GYCollectionBanner *banner,NSI
 /* block */
 @property (nonatomic, copy) collectionViewItemDidSelectedBlock block;
 
-- (instancetype)initWithFrame:(CGRect)frame localImageArray:(NSArray *)localImages;
+- (instancetype)initWithFrame:(CGRect)frame imageArray:(NSArray *)Images;
 @end

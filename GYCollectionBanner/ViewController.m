@@ -24,7 +24,7 @@
                        [UIImage imageNamed:@"5"]];
     
     CGRect rect = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, 300);
-    GYCollectionBanner *banner = [[GYCollectionBanner alloc] initWithFrame:rect localImageArray:array];
+    GYCollectionBanner *banner = [[GYCollectionBanner alloc] initWithFrame:rect imageArray:array];
     
     [self.view addSubview:banner];
 }
