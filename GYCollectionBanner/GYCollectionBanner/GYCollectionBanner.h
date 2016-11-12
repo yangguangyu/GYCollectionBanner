@@ -7,6 +7,15 @@
 //
 
 #import <UIKit/UIKit.h>
+@class GYCollectionBanner;
+@protocol GYCollectionBannerDelegate <NSObject>
+
+- (void)banner:(GYCollectionBanner *)banner didSelectedItemAtIndex:(NSInteger)index;
+
+@end
+
+
+typedef void(^collectionViewItemDidSelectedBlock)(GYCollectionBanner *banner,NSInteger index);
 
 @interface GYCollectionBanner : UIView
 
@@ -22,6 +31,10 @@
 /* 图片的填充模式 */
 @property (nonatomic, assign) UIViewContentMode contentMode;
 
+/* 代理 */
+@property (nonatomic, weak) id <GYCollectionBannerDelegate> delegate;
+/* block */
+@property (nonatomic, copy) collectionViewItemDidSelectedBlock block;
 
 - (instancetype)initWithFrame:(CGRect)frame localImageArray:(NSArray *)localImages;
 @end

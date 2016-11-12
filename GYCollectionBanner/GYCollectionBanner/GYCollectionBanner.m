@@ -119,7 +119,6 @@ static  NSString * const kCellID = @"collectionViewCell";
     NSIndexPath *indexPath = [_collectionView indexPathsForVisibleItems].firstObject;
 
     indexPath = [NSIndexPath indexPathForItem:(indexPath.item + 1) inSection:0];
-    NSLog(@"Visible - %@",indexPath);
     [_collectionView scrollToItemAtIndexPath:indexPath atScrollPosition:UICollectionViewScrollPositionRight animated:YES];
 }
 
@@ -179,6 +178,18 @@ static  NSString * const kCellID = @"collectionViewCell";
     return cell;
 }
 
+- (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
+    [collectionView deselectItemAtIndexPath:indexPath animated:YES];
+    //点击浏览大图，或者跳转
+    
+    if (self.delegate && [self.delegate respondsToSelector:@selector(banner:didSelectedItemAtIndex:)]) {
+        [self.delegate banner:self didSelectedItemAtIndex:indexPath.row];
+    }
+    
+    if (self.block) {
+        self.block(self,indexPath.row);
+    }
+}
 
 
 #pragma mark - UIScrollViewDelegate
